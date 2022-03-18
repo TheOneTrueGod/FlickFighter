@@ -1,23 +1,23 @@
 function InitializeAbilities() {
 	App.abilities = {}
-	
+
 	function MeleeHandleClick(clickCoord) {
 		this.unit.abilUsing = this.unit.selectedAbil;
 		this.Use(clickCoord);
 	}
-	
+
 	App.InitializeAbility = function InitializeAbility(abilityId, unit) {
 		newAbil = null;
 		/* Melee Attack */
 		/* A basic melee attack */
 		/* Flings the piece forwards, dealing damage to anything it comes into contact with */
-		if (true) 
+		if (true)
 		{
 			newAbil = {
 				name: 'MeleeAttack',
 				icon: 'img/MeleeAttack.png',
 				HandleClick: MeleeHandleClick,
-				Update: function Update(deltaTime, updateTimers) { 
+				Update: function Update(deltaTime, updateTimers) {
 					if (this.unit.box2Body)
 					{
 						if (this.unit.acting &&
@@ -39,8 +39,8 @@ function InitializeAbilities() {
 						this.unitsHitInAttack[otherUnit.unitID] = true;
 					}
 				},
-				Use: function Use(pos) { 
-					var impulseVector = new b2Vec2((pos.x - this.unit.box2Body.m_xf.position.x) * CLICK_FORCE_MULTIPLIER, 
+				Use: function Use(pos) {
+					var impulseVector = new b2Vec2((pos.x - this.unit.box2Body.m_xf.position.x) * CLICK_FORCE_MULTIPLIER,
 																				 (pos.y - this.unit.box2Body.m_xf.position.y) * CLICK_FORCE_MULTIPLIER);
 					this.unit.box2Body.m_linearVelocity.x = 0; this.unit.box2Body.m_linearVelocity.y = 0;
 					this.unit.box2Body.ApplyImpulse(impulseVector, this.unit.box2Body.m_xf.position);
@@ -53,13 +53,13 @@ function InitializeAbilities() {
 				}
 			}
 		}
-		
+
 		if (abilityId == 0)
 		{
 			newAbil.name = "Melee Attack";
 			newAbil.icon = "img/MeleeAttack.png"
 		}
-		
+
 		/* Double Attack */
 		/* Two melee attacks in quick succession */
 		else if (abilityId == 1)
@@ -95,17 +95,42 @@ function InitializeAbilities() {
 				}
 			}
 		}
-		
+		else if (abilityId == 3)
+		{
+			newAbil = App.InitializeAbility(1, unit);
+			newAbil.name = "Move and Shoot";
+			newAbil.icon = "img/RangedAttack.png";
+			newAbil.Use = function Use(pos) {
+				if (this.stepOn == 0)
+				{
+					this.DefaultUse(pos);
+				}
+				else if (this.stepOn == 1)
+				{
+					var bulletPos = b2dToPixelCoords(this.unit.box2Body.m_xf.position);
+					pos = b2dToPixelCoords(pos);
+					var ang = Math.atan2(pos.y - bulletPos.y, pos.x - bulletPos.x);
+					App.projectileMgr.CreateProjectile({x: bulletPos.x + Math.cos(ang) * 40, y: bulletPos.y + Math.sin(ang) * 40}, ang);
+					this.unit.acting = true;
+					this.unitsHitInAttack = {};
+					this.stepOn += 1;
+				}
+			}
+			newAbil.IsReadyForOrder = function IsReadyForOrder() {
+				return this.stepOn <= 1
+			}
+		}
+
 		if (newAbil == null)
 		{
 			alert("ERROR:  Couldn't create ability " + abilityId);
 		}
-		
+
 		newAbil.abilityID = abilityId;
 		newAbil.stepOn = 0;
 		newAbil.unit = unit;
 		newAbil.unitsHitInAttack = {};
-		
+
 		return newAbil;
 	}
 }

@@ -6,11 +6,11 @@ $(document).ready(function() {
 	Initialize();
 	setupWorld();
 	setupBoard();
-	
-	StartGame();	
+
+	StartGame();
 });
 
-function Initialize() 
+function Initialize()
 {
 	App.canvas = document.getElementById("gameCanvas");
 	App.ctx = App.canvas.getContext("2d");
@@ -30,7 +30,7 @@ function PreloadImages() {
 	App.images['you'] = new Image(); App.images['you'].src = 'img/you.PNG';
 	App.images['enemy'] = new Image(); App.images['enemy'].src = 'img/enemy.PNG';
 	App.images['bullet'] = new Image(); App.images['bullet'].src = 'img/bullet.PNG';
-	
+
 	App.images.GetImage = function GetImage(key) {
 		return App.images[key];
 	};
@@ -40,10 +40,10 @@ function StartGame()
 {
 	App.unitMgr.CreateUnit({x: 20, y: 20}, 1, 'you');
 	App.unitMgr.CreateUnit({x: 400, y: 20}, 1, 'you');
-	
+
 	for (var i = 0; i < 50; i++)
 	{
-		App.unitMgr.CreateUnit({x: Math.random() * 500 + 100, 
+		App.unitMgr.CreateUnit({x: Math.random() * 500 + 100,
 														y: Math.random() * 400 + 100}, 2, 'them');
 	}
 	window.addEventListener('click', MouseClick);
@@ -97,13 +97,14 @@ function mainLoop()
 	waitingForCommand = App.unitMgr.GetUnitReadyForOrder();
 	if ((waitingForCommand != null && lastUnitForCommand == null) ||
 		  (waitingForCommand == null && lastUnitForCommand != null) ||
-		  (waitingForCommand != null && lastUnitForCommand != null && 
+		  (waitingForCommand != null && lastUnitForCommand != null &&
 			(waitingForCommand.team != lastUnitForCommand.team &&
 			 waitingForCommand.index != lastUnitForCommand.index)))
 	{
 		UpdateAbilityDisplay();
 	}
 	var timeStep = 1.0/80.0;
+	App.unitMgr.CleanupDeadUnits()
 	// Check for game conditions (multiball, endgame, etc.)
 	if (!waitingForCommand)
 	{
@@ -114,13 +115,13 @@ function mainLoop()
 	handleCollisions();
 	// Step the physics world
 	box2Ob.world.Step(timeStep, 3, 3);
-	// Now draw the physics objects		
+	// Now draw the physics objects
 	App.ctx.clearRect(0, 0, App.canvas.width, App.canvas.height);
 	// Draw the background image
 	drawBackground();
 	drawWorld(box2Ob.world, App.ctx);
 	App.unitMgr.DrawUnits();
-	
+
 	setTimeout(mainLoop, 17);
 }
 
@@ -133,7 +134,7 @@ function logicTick(deltaTime) {
 	return unitReadyForOrder;
 }
 
-function handleCollisions() {	
+function handleCollisions() {
 	// Handle the actual contacts
 	for (var contact = box2Ob.world.m_contactList; contact; contact = contact.m_next)
 	{

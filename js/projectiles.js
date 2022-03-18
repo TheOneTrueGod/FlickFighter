@@ -5,12 +5,12 @@ function InitializeProjectileMgr() {
 	App.projectileMgr.CreateProjectile = function CreateProjectile(pos, impulseAngle) {
 		var BULLET_SPEED_THRESHOLD = 0.1;
 		var bulletSpeed = 3;
-		
+
 		var bullet = createBall(box2Ob.world, pos.x, pos.y, 5, false, {isBullet: true},
 			{
-				bouncesLeft: 200,
+				bouncesLeft: 1,
 				ReadyToDelete: function ReadyToDelete(self) {
-					return this.bouncesLeft <= 0					
+					return this.bouncesLeft <= 0
 				},
 				Delete: function Delete(myBody) {
 					box2Ob.world.DestroyBody(myBody)
@@ -35,7 +35,7 @@ function InitializeProjectileMgr() {
 		bullet.ApplyImpulse(impulseVector, bullet.m_xf.position);
 		App.projectileMgr.projectiles.push(bullet);
 	}
-	
+
 	App.projectileMgr.Update = function Update(deltaTime) {
 		var i = 0;
 		var numProjectiles = this.projectiles.length;
@@ -46,7 +46,7 @@ function InitializeProjectileMgr() {
 			if (pUD)
 			{
 				if (pUD.Update) { pUD.Update(projec, deltaTime); }
-				if (pUD.ReadyToDelete && pUD.ReadyToDelete(projec)) { 
+				if (pUD.ReadyToDelete && pUD.ReadyToDelete(projec)) {
 					pUD.Delete(projec.m_shapeList.m_body);
 					this.projectiles.splice(i, 1);
 					numProjectiles -= 1;
@@ -60,5 +60,5 @@ function InitializeProjectileMgr() {
 		}
 	}
 
-	
+
 }
